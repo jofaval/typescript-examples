@@ -1,3 +1,7 @@
 # Typescript Examples
 
-This are just some personal cheatsheets
+These are just some personal cheatsheets
+
+## Credits
+
+Kudos to Matt Pocock for the amazing content
