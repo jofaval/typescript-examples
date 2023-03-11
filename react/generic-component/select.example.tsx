@@ -9,6 +9,8 @@ export type ObjectValues<T> = T[keyof T];
 
 export type SelectMode = ObjectValues<typeof SelectionModeEnum>;
 
+export type SelectGenericsBag = {};
+
 export type GenericSelectProps<
   TElement,
   TValueKey extends keyof TElement,
