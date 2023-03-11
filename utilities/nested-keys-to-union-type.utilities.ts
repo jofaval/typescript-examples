@@ -26,7 +26,7 @@ const PossibleKeys: UnionKeysFromExampleObject[] = [
 ];
 
 type RecursiveRecord = {
-  [key in string]: string | RecursiveRecord;
+  [key in PropertyKey]: string | RecursiveRecord;
 };
 
 type NestedValues<T extends RecursiveRecord, K = keyof T> = K extends string
