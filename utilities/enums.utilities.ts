@@ -17,6 +17,7 @@ function badEnumFunction(enumProp: BadEnumVisibleInRuntime) {
 badEnumFunction(BadEnumVisibleInRuntime.ERROR);
 // @ts-expect-error
 badEnumFunction("error");
+// ^? BadEnumVisibleInRuntime.ERROR === "error", but it's not recognized
 // @ts-expect-error
 badEnumFunction("doesn't exist");
 
@@ -44,6 +45,7 @@ function goodEnumFunction(enumProp: GoodEnumVisibleInRuntimeType) {
 
 goodEnumFunction(GoodEnumVisibleInRuntime.ERROR);
 goodEnumFunction("error");
+// ^? GoodEnumVisibleInRuntime.ERROR === "error" it is recognized
 // @ts-expect-error
 goodEnumFunction("doesn't exist");
 
