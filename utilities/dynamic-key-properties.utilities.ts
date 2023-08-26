@@ -25,18 +25,22 @@ const useModal = <T extends string, TModal extends boolean>(
   const { close, open, visible } = usePrimitiveModal();
 
   const capitalized = capitalize(name);
-  const modalSuffix: "Modal" | "" = modal ? "Modal" : "";
+  const modalSuffix = modal ? "Modal" : "";
 
   const openKey =
-    `open${capitalized}${modalSuffix}` as `open${Capitalize<T>}${TModalSuffix<TModal>}`;
+    `open${capitalized}${modalSuffix}` as `open${typeof capitalized}${TModalSuffix<TModal>}`;
   const closeKey =
-    `close${capitalized}${modalSuffix}` as `close${Capitalize<T>}${TModalSuffix<TModal>}`;
+    `close${capitalized}${modalSuffix}` as `close${typeof capitalized}${TModalSuffix<TModal>}`;
   const visibleKey =
-    `is${capitalized}${modalSuffix}Visible` as `is${Capitalize<T>}${TModalSuffix<TModal>}Visible`;
+    `is${capitalized}${modalSuffix}Visible` as `is${typeof capitalized}${TModalSuffix<TModal>}Visible`;
 
-  type ModalHookResponse = { [k in typeof openKey]: typeof open } & {
-    [k in typeof closeKey]: typeof close;
-  } & { [k in typeof visibleKey]: typeof visible };
+  type ModalHookResponse = {
+    [k in typeof openKey]: () => void;
+  } & {
+    [k in typeof closeKey]: () => void;
+  } & {
+    [k in typeof visibleKey]: boolean;
+  };
 
   return {
     [openKey]: open,
