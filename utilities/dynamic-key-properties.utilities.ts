@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { Writable } from "ts-toolbelt/out/List/Writable";
+import { Join } from "ts-toolbelt/out/String/Join";
 
-const capitalize = <T extends string>(text: T): Capitalize<T> => {
+type ForceCapitalize<T extends string> = Capitalize<Lowercase<T>>;
+
+const capitalize = <T extends string>(text: T): ForceCapitalize<T> => {
   return (text.charAt(0).toLocaleUpperCase() +
-    text.substring(1).toLocaleLowerCase()) as Capitalize<T>;
+    text.substring(1).toLocaleLowerCase()) as ForceCapitalize<T>;
 };
 
 const usePrimitiveModal = () => {
@@ -18,21 +22,20 @@ const usePrimitiveModal = () => {
 
 type TModalSuffix<T extends boolean> = T extends true ? "Modal" : "";
 
-const useModal = <T extends string, TModal extends boolean>(
-  name: T,
+const inferUseModalTyping = <TName extends string, TModal extends boolean>(
+  name: TName,
   modal: TModal
 ) => {
   const { close, open, visible } = usePrimitiveModal();
 
-  const capitalized = capitalize(name);
   const modalSuffix = modal ? "Modal" : "";
 
   const openKey =
-    `open${capitalized}${modalSuffix}` as `open${typeof capitalized}${TModalSuffix<TModal>}`;
+    `open${name}${modalSuffix}` as `open${TName}${TModalSuffix<TModal>}`;
   const closeKey =
-    `close${capitalized}${modalSuffix}` as `close${typeof capitalized}${TModalSuffix<TModal>}`;
+    `close${name}${modalSuffix}` as `close${TName}${TModalSuffix<TModal>}`;
   const visibleKey =
-    `is${capitalized}${modalSuffix}Visible` as `is${typeof capitalized}${TModalSuffix<TModal>}Visible`;
+    `is${name}${modalSuffix}Visible` as `is${TName}${TModalSuffix<TModal>}Visible`;
 
   type ModalHookResponse = {
     [k in typeof openKey]: () => void;
@@ -51,6 +54,15 @@ const useModal = <T extends string, TModal extends boolean>(
   };
 };
 
+const useModal = <T extends string, TModal extends boolean>(
+  name: T,
+  modal: TModal
+) => {
+  const capitalized = capitalize(name);
+
+  return inferUseModalTyping(capitalized, modal);
+};
+
 const saveModal = useModal("save", true);
 const {
   closeReservationModal,
@@ -67,3 +79,39 @@ type DefaultMagic = ReturnType<typeof useModal<"", false>>;
 
 // TODO: work with array of strings, not to lose camelCase formatting
 // BookingTableConfirmation would be lost as it is
+
+const capitalizeArray = <T extends readonly string[]>(words: T) => {
+  return words.map((word) => capitalize(word)) as {
+    [k in keyof T]: ForceCapitalize<T[k]>;
+  };
+};
+
+const joinStringArray = <T extends readonly string[], TSep extends string>(
+  array: T,
+  separator: TSep
+) => {
+  return array.join(separator) as Join<Writable<T>, "">;
+};
+
+const useModalArray = <T extends readonly string[], TModal extends boolean>(
+  keys: T,
+  modal: TModal
+) => {
+  const capitalized = capitalizeArray(keys);
+  const joined = joinStringArray(capitalized, "");
+
+  return inferUseModalTyping(joined, modal);
+};
+
+const bookingTableConfirmation = useModalArray(
+  ["booking", "tAble", "confirmAtion"] as const,
+  true
+);
+
+const {
+  closeMultipleKeysModal,
+  isMultipleKeysModalVisible,
+  openMultipleKeysModal,
+} = useModalArray(["multiple", "keys"] as const, true);
+
+const {} = useModalArray(["without", "as", "const"], true);
