@@ -69,39 +69,43 @@ const fromKeyValueToObject = <
   TValue extends any,
   TKeyProp extends PropertyKey,
   TValueProp extends PropertyKey,
-  TKeyValue extends KeyValue<TKey, TValue, TKeyProp, TValueProp>[]
+  TKeyValue extends readonly ({ readonly [k in TKeyProp]: PropertyKey } & {
+    readonly [k in TValueProp]: any;
+  })[]
 >(
   keyValue: TKeyValue,
   // allow for optional values while retaining type inference
   key: TKeyProp,
   value: TValueProp
 ) => {
-  type TFinalObject = KeyValueToObject<
-    TKeyProp,
-    TValueProp,
-    TKeyValue,
-    KeyValueToObjectArray<TKeyProp, TValueProp, TKeyValue>
-  >;
-  return {} as TFinalObject;
+  // return keyValue;
+  const arrayOfObjects = keyValue.map((pair) => ({
+    [pair[key]]: pair[value],
+  })) as {
+    [TIndex in keyof TKeyValue]: {
+      [k in TKeyValue[TIndex][TKeyProp]]: TKeyValue[TIndex][TValueProp];
+    };
+  };
 
-  // return keyValue.reduce<TFinalObject>((acc, curr) => {
-  //   acc[curr[key]] = curr[value];
-  //   return acc;
-  // }, {});
+  const mergedObjects = arrayOfObjects.reduce((acc, curr) => {
+    return Object.assign(acc, curr);
+  }, {} as MergeAll<{}, typeof arrayOfObjects>);
+
+  return mergedObjects;
 };
 
 const keyValueArrayExample = [
-  { key: "firstName", value: "Foo" } as const,
-  { key: "lastName", value: "Bar" } as const,
-  { key: "age", value: 24 } as const,
-];
+  { key: "firstName", value: "Foo" },
+  { key: "lastName", value: "Bar" },
+  { key: "age", value: 24 },
+] as const;
 
 const result = fromKeyValueToObject(keyValueArrayExample, "key", "value");
 const { age, firstName, lastName } = result;
 
 const differentKeysArrayExample = [
-  { clave: "test", valor: "funciona" } as const,
-];
+  { clave: "test", valor: "funciona" },
+] as const;
 
 const differentKeys = fromKeyValueToObject(
   differentKeysArrayExample,
@@ -109,3 +113,9 @@ const differentKeys = fromKeyValueToObject(
   "valor"
 );
 const { test } = differentKeys;
+
+// javascript test
+// [{ key: "test", value: "foo" }].reduce((acc, curr) => {
+//   acc[curr.key] = curr.value;
+//   return acc;
+// }, {});
