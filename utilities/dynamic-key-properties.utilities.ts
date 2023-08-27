@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Narrow } from "ts-toolbelt/out/Function/Narrow";
 import { Writable } from "ts-toolbelt/out/List/Writable";
 import { Join } from "ts-toolbelt/out/String/Join";
 
@@ -86,15 +87,15 @@ const capitalizeArray = <T extends readonly string[]>(words: T) => {
   };
 };
 
-const joinStringArray = <T extends readonly string[], TSep extends string>(
-  array: T,
-  separator: TSep
-) => {
-  return array.join(separator) as Join<Writable<T>, "">;
+const joinStringArray = <T, TSep extends string>(array: T, separator: TSep) => {
+  return array.join(separator) as Join<
+    Writable<T extends string[] ? T : never>,
+    ""
+  >;
 };
 
 const useModalArray = <T extends readonly string[], TModal extends boolean>(
-  keys: T,
+  keys: Narrow<T>,
   modal: TModal
 ) => {
   const capitalized = capitalizeArray(keys);
@@ -104,7 +105,7 @@ const useModalArray = <T extends readonly string[], TModal extends boolean>(
 };
 
 const bookingTableConfirmation = useModalArray(
-  ["booking", "tAble", "confirmAtion"] as const,
+  ["booking", "tAble", "confirmAtion"],
   true
 );
 
@@ -112,6 +113,10 @@ const {
   closeMultipleKeysModal,
   isMultipleKeysModalVisible,
   openMultipleKeysModal,
-} = useModalArray(["multiple", "keys"] as const, true);
+} = useModalArray(["multiple", "keys"], true);
 
-const {} = useModalArray(["without", "as", "const"], true);
+const {
+  closeWithoutAsConstModal,
+  isWithoutAsConstModalVisible,
+  openWithoutAsConstModal,
+} = useModalArray(["without", "as", "const"], true);
