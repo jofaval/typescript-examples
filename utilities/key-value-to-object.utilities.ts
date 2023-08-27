@@ -1,3 +1,5 @@
+import { MergeAll } from "ts-toolbelt/out/Object/MergeAll";
+
 // Matt Pocock
 type Prettify<T> = {
   [k in keyof T]: T[k];
@@ -26,18 +28,39 @@ const keyValueFoo: KeyValueFoo = [
   { key: "age", value: 24 },
 ];
 
-type KeyValueToObject<
+type KeyValueToObjectArray<
   TKeyProp extends PropertyKey,
   TValueProp extends PropertyKey,
   TKeyValue extends KeyValue<PropertyKey, any, TKeyProp, TValueProp>[]
 > = {
-  [TKey in TKeyValue[number][TKeyProp]]: TKeyValue[number][TValueProp];
+  [TKey in keyof TKeyValue]: {
+    [subKey in TKeyValue[TKey][TKeyProp]]: TKeyValue[TKey][TValueProp];
+  };
 };
 
-const keyValueToObjectBar: KeyValueToObject<"key", "value", KeyValueFoo> = {
+type KeyValueToObject<
+  TKeyProp extends PropertyKey,
+  TValueProp extends PropertyKey,
+  TKeyValue extends KeyValue<PropertyKey, any, TKeyProp, TValueProp>[],
+  TObjects extends KeyValueToObjectArray<TKeyProp, TValueProp, TKeyValue>
+> = MergeAll<{}, TObjects>;
+
+type MoreInferenceTest = KeyValueToObject<
+  "key",
+  "value",
+  KeyValueFoo,
+  KeyValueToObjectArray<"key", "value", KeyValueFoo>
+>;
+
+const keyValueToObjectBar: KeyValueToObject<
+  "key",
+  "value",
+  KeyValueFoo,
+  KeyValueToObjectArray<"key", "value", KeyValueFoo>
+> = {
   magic: 0,
   const: "literal",
-  // FIXME: This does not error
+  // @ts-expect-error
   age: "literal",
 };
 
@@ -53,10 +76,18 @@ const fromKeyValueToObject = <
   key: TKeyProp,
   value: TValueProp
 ) => {
-  return keyValue.reduce((acc, curr) => {
-    acc[curr[key]] = curr[value];
-    return acc;
-  }, {} as KeyValueToObject<TKeyProp, TValueProp, TKeyValue>);
+  type TFinalObject = KeyValueToObject<
+    TKeyProp,
+    TValueProp,
+    TKeyValue,
+    KeyValueToObjectArray<TKeyProp, TValueProp, TKeyValue>
+  >;
+  return {} as TFinalObject;
+
+  // return keyValue.reduce<TFinalObject>((acc, curr) => {
+  //   acc[curr[key]] = curr[value];
+  //   return acc;
+  // }, {});
 };
 
 const keyValueArrayExample = [
