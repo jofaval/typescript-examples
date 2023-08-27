@@ -65,8 +65,6 @@ const keyValueToObjectBar: KeyValueToObject<
 };
 
 const fromKeyValueToObject = <
-  TKey extends PropertyKey,
-  TValue extends any,
   TKeyProp extends PropertyKey,
   TValueProp extends PropertyKey,
   TKeyValue extends readonly ({ readonly [k in TKeyProp]: PropertyKey } & {
