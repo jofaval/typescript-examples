@@ -49,6 +49,7 @@ const fromKeyValueToObject = <
   TKeyValue extends KeyValue<TKey, TValue, TKeyProp, TValueProp>[]
 >(
   keyValue: TKeyValue,
+  // allow for optional values while retaining type inference
   key: TKeyProp,
   value: TValueProp
 ) => {
@@ -66,3 +67,14 @@ const keyValueArrayExample = [
 
 const result = fromKeyValueToObject(keyValueArrayExample, "key", "value");
 const { age, firstName, lastName } = result;
+
+const differentKeysArrayExample = [
+  { clave: "test", valor: "funciona" } as const,
+];
+
+const differentKeys = fromKeyValueToObject(
+  differentKeysArrayExample,
+  "clave",
+  "valor"
+);
+const { test } = differentKeys;
