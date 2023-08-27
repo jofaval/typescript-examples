@@ -95,7 +95,7 @@ const fromKeyValueToObject = <
 const keyValueArrayExample = [
   { key: "firstName", value: "Foo" },
   { key: "lastName", value: "Bar" },
-  { key: "age", value: 24 },
+  { key: "age", value: 24 as number },
 ] as const;
 
 const result = fromKeyValueToObject(keyValueArrayExample, "key", "value");
@@ -117,3 +117,17 @@ const { test } = differentKeys;
 //   acc[curr.key] = curr.value;
 //   return acc;
 // }, {});
+
+type KeyValueToObjectHelper<
+  TKeyProp extends PropertyKey,
+  TValueProp extends PropertyKey,
+  TKeyValue extends readonly ({ readonly [k in TKeyProp]: PropertyKey } & {
+    readonly [k in TValueProp]: any;
+  })[]
+> = ReturnType<typeof fromKeyValueToObject<TKeyProp, TValueProp, TKeyValue>>;
+
+type KeyValueToObjectHelperTest = KeyValueToObjectHelper<
+  "key",
+  "value",
+  [{ key: "test"; value: number }]
+>;
