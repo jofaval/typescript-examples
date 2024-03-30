@@ -5,6 +5,7 @@ const object = {
     FIRST_THIRD: "first_third",
     nested: {
       key: "jashgjhasgjhsag",
+      foo: "bar",
     },
   },
   SECOND: {
@@ -88,10 +89,38 @@ type WithPrefix<
     : TKey
   : undefined;
 
+type FilterKeysByType<T extends object, TType> = ObjectValues<{
+  [TKey in keyof T]: T[TKey] extends TType ? TKey : never;
+}>;
+
+type OnlyKeysWithObjectsAsValues<T extends object> = FilterKeysByType<
+  T,
+  object
+>;
+
+type OnlyKeysWithObjectsAsValuesAssertion = OnlyKeysWithObjectsAsValues<
+  typeof object.FIRST
+>;
+
+type AddPrefixToLiterals<
+  T extends string,
+  TPrefix extends string
+> = `${TPrefix}${T}`;
+
+type AddPrefixToLiteralsAssertion = AddPrefixToLiterals<
+  "nested" | "test",
+  "FIRST"
+>;
+
 type NestedKeysFromScratchWithConfiguration<
   TConfiguration extends NestedConfiguration
 > =
-  | keyof TConfiguration["object"]
+  | (FilterKeysByType<TConfiguration["object"], object> extends string
+      ? WithPrefix<
+          TConfiguration,
+          FilterKeysByType<TConfiguration["object"], object>
+        >
+      : never)
   | {
       [TKey in keyof TConfiguration["object"]]: TConfiguration["object"][TKey] extends object
         ? NestedKeysFromScratchWithConfiguration<{
@@ -111,4 +140,4 @@ const getKeys = <
   k: T
 ) => {};
 
-getKeys("");
+getKeys("FIRST.nested");
